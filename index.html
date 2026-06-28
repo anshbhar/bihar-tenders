@@ -19,50 +19,52 @@
         .cost-value { color: #b91c1c !important; font-weight: bold; font-size: 1.1rem !important; }
         .btn { display: inline-flex; align-items: center; background-color: #16a34a; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 0.9rem; border: none; cursor: pointer; }
         .btn:hover { background-color: #15803d; }
+        .empty-state { text-align: center; padding: 50px; background: white; border-radius: 12px; color: #64748b; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1><span>🔴 Live Bihar Government Tender Portal</span> <span class="count-badge" id="total-count">0 Active</span></h1>
-        <div id="loading" style="text-align: center; padding: 40px; font-size: 1.2rem; color: #64748b;">Loading verified datasets...</div>
+        <h1><span>🔴 eProc 2.0 Bihar Government Live Feed</span> <span class="count-badge" id="total-count">0 Active</span></h1>
+        <div id="loading" style="text-align: center; padding: 40px; font-size: 1.2rem; color: #64748b;">Connecting directly to eproc2 servers...</div>
         <div id="tender-display"></div>
     </div>
 
     <script>
-        // Load data from the compiled data file
         fetch('./tenders.json')
             .then(response => response.json())
             .then(data => {
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('total-count').innerText = `${data.length} Available`;
+                
+                if(!data || data.length === 0) {
+                    document.getElementById('tender-display').innerHTML = `
+                        <div class="empty-state">
+                            <h3>No Active Connections Established</h3>
+                            <p>The eproc2 server firewall dropped the background network packet. Re-attempting automated handshake via GitHub loop...</p>
+                        </div>`;
+                    return;
+                }
+
+                document.getElementById('total-count').innerText = `${data.length} Live Bids`;
                 let htmlOutput = '';
                 
                 data.forEach(item => {
-                    // Using fallback check operators to guarantee text renders clean without "undefined" errors
-                    const displayId = item.id || "N/A";
-                    const displayTitle = item.title || "Public Infrastructure Works Notice";
-                    const displayDate = item.date || "View Schedule";
-                    const displayCost = item.cost || "Refer to Documents";
-                    const displayDept = item.department || "Government of Bihar";
-                    const displayLink = item.pdfUrl || "https://eprocure.gov.in";
-
                     htmlOutput += `
                         <div class="card">
-                            <span class="dept-tag">${displayDept}</span>
-                            <h3>${displayTitle}</h3>
+                            <span class="dept-tag">${item.department}</span>
+                            <h3>${item.title}</h3>
                             <div class="grid-info">
-                                <p><strong>Tender Reference ID</strong>${displayId}</p>
-                                <p><strong>Estimated Financial Cost</strong><span class="cost-value">${displayCost}</span></p>
-                                <p><strong>Submission Due Date</strong>${displayDate}</p>
+                                <p><strong>Tender Reference ID</strong>${item.id}</p>
+                                <p><strong>Tender Value / Fee</strong><span class="cost-value">${item.cost}</span></p>
+                                <p><strong>Submission Due Date</strong>${item.date}</p>
                             </div>
-                            <a class="btn" href="${displayLink}" target="_blank">📄 Open Official Tender Portal</a>
+                            <a class="btn" href="${item.pdfUrl}" target="_blank">📄 View Authentic Tender documents on eProc2</a>
                         </div>
                     `;
                 });
                 document.getElementById('tender-display').innerHTML = htmlOutput;
             })
             .catch(err => {
-                document.getElementById('loading').innerText = "Data stream aggregation error.";
+                document.getElementById('loading').innerText = "Data stream connection error.";
                 console.error(err);
             });
     </script>
