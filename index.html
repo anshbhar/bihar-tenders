@@ -5,45 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Bihar Tenders Portal</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 40px; color: #333; }
-        .container { max-width: 900px; margin: 0 auto; }
-        h1 { color: #1e3a8a; border-bottom: 3px solid #3b82f6; padding-bottom: 10px; margin-bottom: 30px; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border-left: 5px solid #3b82f6; }
-        .card h3 { margin: 0 0 10px 0; color: #2c3e50; font-size: 1.2rem; }
-        .card p { margin: 5px 0; color: #64748b; font-size: 0.95rem; }
-        .btn { display: inline-block; background-color: #2563eb; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 0.85rem; margin-top: 10px; }
-        .btn:hover { background-color: #1d4ed8; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f4f8; margin: 0; padding: 40px; color: #1e293b; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { color: #1e3a8a; border-bottom: 4px solid #2563eb; padding-bottom: 12px; margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between; font-size: 2rem; }
+        .count-badge { background: #2563eb; color: white; padding: 4px 12px; border-radius: 20px; font-size: 1rem; }
+        .card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 24px; border-left: 6px solid #2563eb; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+        .dept-tag { background: #e2e8f0; color: #475569; padding: 4px 10px; border-radius: 4px; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; display: inline-block; margin-bottom: 12px; }
+        .card h3 { margin: 0 0 12px 0; color: #0f172a; font-size: 1.3rem; line-height: 1.4; }
+        .grid-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; }
+        .grid-info p { margin: 0; font-size: 0.95rem; color: #334155; }
+        .grid-info strong { color: #64748b; display: block; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 2px; }
+        .cost-value { color: #b91c1c !important; font-weight: bold; font-size: 1.1rem !important; }
+        .btn { display: inline-flex; align-items: center; background-color: #16a34a; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 0.9rem; border: none; cursor: pointer; }
+        .btn:hover { background-color: #15803d; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔴 Live Bihar Government Tender Dashboard</h1>
-        <div id="loading">Syncing secure database modules...</div>
+        <h1><span>🔴 Live Bihar Government Tender Portal</span> <span class="count-badge" id="total-count">0 Active</span></h1>
+        <div id="loading" style="text-align: center; padding: 40px; font-size: 1.2rem; color: #64748b;">Loading verified datasets...</div>
         <div id="tender-display"></div>
     </div>
 
     <script>
-        // Reads the JSON file compiled by GitHub Actions
         fetch('./tenders.json')
             .then(response => response.json())
             .then(data => {
                 document.getElementById('loading').style.display = 'none';
+                document.getElementById('total-count').innerText = `${data.length} Available`;
                 let htmlOutput = '';
                 
                 data.forEach(item => {
                     htmlOutput += `
                         <div class="card">
+                            <span class="dept-tag">${item.department}</span>
                             <h3>${item.title}</h3>
-                            <p><strong>Tender Identification:</strong> ${item.id}</p>
-                            <p><strong>Submission Deadline Date:</strong> ${item.date}</p>
-                            <a class="btn" href="https://eprocure.gov.in" target="_blank">📥 View Official PDF Document</a>
+                            <div class="grid-info">
+                                <p><strong>Tender Reference ID</strong>${item.id}</p>
+                                <p><strong>Estimated Financial Cost</strong><span class="cost-value">${item.cost}</span></p>
+                                <p><strong>Submission Due Date</strong>${item.date}</p>
+                            </div>
+                            <a class="btn" href="${item.pdfUrl}" target="_blank">📄 Download Official PDF Document</a>
                         </div>
                     `;
                 });
                 document.getElementById('tender-display').innerHTML = htmlOutput;
             })
             .catch(err => {
-                document.getElementById('loading').innerText = "Failed to synchronize dataset feed.";
+                document.getElementById('loading').innerText = "Data stream aggregation error.";
                 console.error(err);
             });
     </script>
