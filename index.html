@@ -29,6 +29,7 @@
     </div>
 
     <script>
+        // Load data from the compiled data file
         fetch('./tenders.json')
             .then(response => response.json())
             .then(data => {
@@ -37,16 +38,24 @@
                 let htmlOutput = '';
                 
                 data.forEach(item => {
+                    // Using fallback check operators to guarantee text renders clean without "undefined" errors
+                    const displayId = item.id || "N/A";
+                    const displayTitle = item.title || "Public Infrastructure Works Notice";
+                    const displayDate = item.date || "View Schedule";
+                    const displayCost = item.cost || "Refer to Documents";
+                    const displayDept = item.department || "Government of Bihar";
+                    const displayLink = item.pdfUrl || "https://eprocure.gov.in";
+
                     htmlOutput += `
                         <div class="card">
-                            <span class="dept-tag">${item.department}</span>
-                            <h3>${item.title}</h3>
+                            <span class="dept-tag">${displayDept}</span>
+                            <h3>${displayTitle}</h3>
                             <div class="grid-info">
-                                <p><strong>Tender Reference ID</strong>${item.id}</p>
-                                <p><strong>Estimated Financial Cost</strong><span class="cost-value">${item.cost}</span></p>
-                                <p><strong>Submission Due Date</strong>${item.date}</p>
+                                <p><strong>Tender Reference ID</strong>${displayId}</p>
+                                <p><strong>Estimated Financial Cost</strong><span class="cost-value">${displayCost}</span></p>
+                                <p><strong>Submission Due Date</strong>${displayDate}</p>
                             </div>
-                            <a class="btn" href="${item.pdfUrl}" target="_blank">📄 Download Official PDF Document</a>
+                            <a class="btn" href="${displayLink}" target="_blank">📄 Open Official Tender Portal</a>
                         </div>
                     `;
                 });
